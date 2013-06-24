@@ -33,6 +33,12 @@ QUICKREF
 	memset ansi pure
 */
 
+/*
+ * The body of this function should not appear in PNaCl bitcode.
+ * See https://code.google.com/p/nativeclient/issues/detail?id=3493
+ */
+#ifndef __pnacl__
+
 #include <string.h>
 
 #define LBLOCKSIZE (sizeof(long))
@@ -100,3 +106,5 @@ _DEFUN (memset, (m, c, n),
 
   return m;
 }
+
+#endif /* __pnacl__ */

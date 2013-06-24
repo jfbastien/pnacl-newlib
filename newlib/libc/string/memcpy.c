@@ -33,6 +33,12 @@ QUICKREF
         memcpy ansi pure
 	*/
 
+/*
+ * The body of this function should not appear in PNaCl bitcode.
+ * See https://code.google.com/p/nativeclient/issues/detail?id=3493
+ */
+#ifndef __pnacl__
+
 #include <_ansi.h>
 #include <string.h>
 
@@ -108,3 +114,5 @@ _DEFUN (memcpy, (dst0, src0, len0),
   return dst0;
 #endif /* not PREFER_SIZE_OVER_SPEED */
 }
+
+#endif /* __pnacl__ */

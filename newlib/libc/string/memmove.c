@@ -35,6 +35,12 @@ QUICKREF
 	memmove ansi pure
 */
 
+/*
+ * The body of this function should not appear in PNaCl bitcode.
+ * See https://code.google.com/p/nativeclient/issues/detail?id=3493
+ */
+#ifndef __pnacl__
+
 #include <string.h>
 #include <_ansi.h>
 #include <stddef.h>
@@ -140,3 +146,5 @@ _DEFUN (memmove, (dst_void, src_void, length),
   return dst_void;
 #endif /* not PREFER_SIZE_OVER_SPEED */
 }
+
+#endif /* __pnacl__ */
