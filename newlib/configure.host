@@ -351,9 +351,10 @@ case "${host}" in
 	xdr_dir=xdr
 	;;
   *-*-nacl*)
-	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DCLOCK_PROVIDED -DHAVE_NANOSLEEP -DMALLOC_PROVIDED"
+	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DCLOCK_PROVIDED -DHAVE_NANOSLEEP -DMALLOC_PROVIDED -D_NO_GETCWD -D_NO_GETLOGIN -D_NO_GETUT -D_NO_GETPASS"
 	sys_dir=nacl
 	posix_dir=posix
+	unix_dir=unix
 	;;
   *-*-netware*)
 	signal_dir=
