@@ -191,6 +191,11 @@ SYM (\name):
 	stmea		a1!, { VREGS, fp, ip, sp, lr }
 #endif
 
+#ifdef __native_client__
+	.fpu vfp
+	SFI_BREG(a1)	\
+	vstm		a1, {d8-d15}
+#endif
 #if 0	/* Simulator does not cope with FP instructions yet.  */
 #ifndef __SOFTFP__
 	/* Save the floating point registers.  */
@@ -220,6 +225,10 @@ SYM (\name):
 	ldmfd		a1!, { VREGS, fp, ip, sp, lr }
 #endif
 
+#ifdef __native_client__
+	SFI_BREG(a1)	\
+	vldm		a1, {d8-d15}
+#endif
 #if 0	/* Simulator does not cope with FP instructions yet.  */
 #ifndef __SOFTFP__
 	/* Restore floating point registers as well.  */
