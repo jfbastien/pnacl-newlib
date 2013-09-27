@@ -7,7 +7,7 @@
 #if defined(__native_client__)
 #define _CLOCKS_PER_SEC_ 1000000
 #else  /* !__rtems__ && !__native_client__ */
-#if defined(__arm__) || defined(__thumb__)
+#if defined(__aarch64__) || defined(__arm__) || defined(__thumb__)
 #define _CLOCKS_PER_SEC_ 100
 #endif
 #endif

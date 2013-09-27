@@ -31,6 +31,7 @@
 #define	_FSTDIO			/* ``function stdio'' */
 
 #define __need_size_t
+#define __need_NULL
 #include <stddef.h>
 
 #define __need___va_list
@@ -96,10 +97,6 @@ typedef _fpos64_t fpos64_t;
 #define	_IOLBF	1		/* setvbuf should set line buffered */
 #define	_IONBF	2		/* setvbuf should set unbuffered */
 
-#ifndef NULL
-#define	NULL	0
-#endif
-
 #define	EOF	(-1)
 
 #ifdef __BUFSIZ__
@@ -142,15 +139,9 @@ typedef _fpos64_t fpos64_t;
 
 #define	TMP_MAX		26
 
-#ifndef _REENT_ONLY
 #define	stdin	(_REENT->_stdin)
 #define	stdout	(_REENT->_stdout)
 #define	stderr	(_REENT->_stderr)
-#else /* _REENT_ONLY */
-#define	stdin	(_impure_ptr->_stdin)
-#define	stdout	(_impure_ptr->_stdout)
-#define	stderr	(_impure_ptr->_stderr)
-#endif /* _REENT_ONLY */
 
 #define _stdin_r(x)	((x)->_stdin)
 #define _stdout_r(x)	((x)->_stdout)
@@ -227,6 +218,9 @@ int	_EXFUN(sprintf, (char *, const char *, ...)
                _ATTRIBUTE ((__format__ (__printf__, 2, 3))));
 int	_EXFUN(remove, (const char *));
 int	_EXFUN(rename, (const char *, const char *));
+#ifdef _COMPILING_NEWLIB
+int	_EXFUN(_rename, (const char *, const char *));
+#endif
 #endif
 #if !defined(__STRICT_ANSI__) || defined(__USE_XOPEN2K)
 #ifdef _COMPILING_NEWLIB

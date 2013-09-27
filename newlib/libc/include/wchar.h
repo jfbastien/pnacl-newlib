@@ -8,6 +8,7 @@
 #define __need_size_t
 #define __need_wchar_t
 #define __need_wint_t
+#define __need_NULL
 #include <stddef.h>
 
 #define __need___va_list
@@ -18,10 +19,6 @@
 
 /* For __STDC_ISO_10646__ */
 #include <sys/features.h>
-
-#ifndef NULL
-#define NULL	0
-#endif
 
 #ifndef WEOF
 # define WEOF ((wint_t)-1)
@@ -182,13 +179,8 @@ int	_EXFUN(_wscanf_r, (struct _reent *, const wchar_t *, ...));
 
 #define getwc(fp)	fgetwc(fp)
 #define putwc(wc,fp)	fputwc((wc), (fp))
-#ifndef _REENT_ONLY
 #define getwchar()	fgetwc(_REENT->_stdin)
 #define putwchar(wc)	fputwc((wc), _REENT->_stdout)
-#else
-#define getwchar()	fgetwc(_impure_ptr->_stdin)
-#define putwchar(wc)	fputwc((wc), _impure_ptr->_stdout)
-#endif
 
 _END_STD_C
 
