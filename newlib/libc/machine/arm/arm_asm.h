@@ -64,11 +64,14 @@
 #if defined (__native_client__)
 # ifdef __ASSEMBLER__
 #  define SFI_BREG(reg)	sfi_breg reg,
+#  define SFI_SP sfi_sp
 # else
 #  define SFI_BREG(reg)	"sfi_breg " #reg ","
+#  define SFI_SP "sfi_sp "
 # endif
 #else
 #define SFI_BREG(reg)
+#define SFI_SP
 #endif
 
 

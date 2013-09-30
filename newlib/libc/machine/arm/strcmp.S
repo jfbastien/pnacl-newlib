@@ -65,6 +65,9 @@
 #endif
         .global strcmp
         .type   strcmp, %function
+#ifdef __native_client__
+	.p2align 4
+#endif
 strcmp:
 
 #if (defined (__thumb__) && !defined (__thumb2__))
@@ -82,7 +85,9 @@ strcmp:
         bx      lr
 #elif (defined (__OPTIMIZE_SIZE__) || defined (PREFER_SIZE_OVER_SPEED))
 1:
+	SFI_BREG(r0) \
         ldrb    r2, [r0], #1
+	SFI_BREG(r1) \
         ldrb    r3, [r1], #1
         cmp     r2, #1
         it      cs
@@ -157,7 +162,8 @@ strcmp:
 
         .macro  init
         /* Macro to save temporary registers and prepare magic values.  */
-        subs    sp, sp, #16
+	SFI_SP \
+        sub     sp, sp, #16
         strd    r4, r5, [sp, #8]
         strd    r6, r7, [sp]
         mvn     r6, #0  /* all F */
@@ -225,7 +231,9 @@ strcmp:
         */
 
         /* Load the next double-word from each string.  */
+	SFI_BREG(r0) \
         ldrd    r2, r3, [r0], #8
+	SFI_BREG(r1) \
         ldrd    r4, r5, [r1], #8
 
         magic_compare_and_branch w1=r2, w2=r4, label=.Lreturn_24
@@ -241,12 +249,14 @@ strcmp:
         /* The offset of r0 from a word boundary is in ip. Thus, the number of bytes
         to read until the next word boudnary is 4-ip.  */
         bic     r0, r0, #3
+	SFI_BREG(r0) \
         ldr     r2, [r0], #4
         lsls    ip, ip, #31
         beq     .Lbyte2
         bcs     .Lbyte3
 
 .Lbyte1:
+	SFI_BREG(r1) \
         ldrb    ip, [r1], #1
         uxtb    r3, r2, ror #BYTE1_OFFSET
         subs    ip, r3, ip
@@ -254,6 +264,7 @@ strcmp:
         m_cbz   reg=r3, label=.Lfast_return
 
 .Lbyte2:
+	SFI_BREG(r1) \
         ldrb    ip, [r1], #1
         uxtb    r3, r2, ror #BYTE2_OFFSET
         subs    ip, r3, ip
@@ -261,6 +272,7 @@ strcmp:
         m_cbz   reg=r3, label=.Lfast_return
 
 .Lbyte3:
+	SFI_BREG(r1) \
         ldrb    ip, [r1], #1
         uxtb    r3, r2, ror #BYTE3_OFFSET
         subs    ip, r3, ip
@@ -269,7 +281,7 @@ strcmp:
 
 .Lfast_return:
         mov     r0, ip
-        bx      lr
+	RETURN
 
 .Lword_aligned_r0:
         init
@@ -286,7 +298,9 @@ strcmp:
 
         /* If r0 is not double-word aligned yet, align it by loading
         and comparing the next word from each string.  */
+	SFI_BREG(r0) \
         ldr     r2, [r0], #4
+	SFI_BREG(r1) \
         ldr     r4, [r1], #4
         magic_compare_and_branch w1=r2 w2=r4 label=.Lreturn_24
 
@@ -300,6 +314,7 @@ strcmp:
         r0 is double-word aligned, but r1 is not double-word aligned.  */
 
         /* Initialize the queue.  */
+	SFI_BREG(r1) \
         ldr     r5, [r1], #4
 
         /* Compare two words in every iteration.  */
@@ -311,8 +326,10 @@ strcmp:
         */
 
         /* Load the next double-word from each string and compare.  */
+	SFI_BREG(r0) \
         ldrd    r2, r3, [r0], #8
         magic_compare_and_branch w1=r2 w2=r5 label=.Lreturn_25
+	SFI_BREG(r1) \
         ldrd    r4, r5, [r1], #8
         magic_compare_and_branch w1=r3 w2=r4 label=.Lreturn_34
         b       3b
@@ -326,11 +343,13 @@ strcmp:
         OFFSETHI is 32 - OFFSETLO (i.e., offset from the next word).  */
 
         /* Initialize the shift queue.  */
+	SFI_BREG(r1) \
         ldr     r5, [r1], #4
 
         /* Compare one word from each string in every loop iteration.  */
         .p2align        2
 7:
+	SFI_BREG(r0) \
         ldr     r3, [r0], #4
         S2LOMEM r5, r5, #\offsetlo
         magic_find_zero_bytes w1=r3
@@ -339,6 +358,7 @@ strcmp:
         it      eq
         cmpeq   r2, r5
         bne     .Lreturn_25
+	SFI_BREG(r1) \
         ldr     r5, [r1], #4
         cmp     ip, #0
         eor	r3, r2, r3
@@ -389,7 +409,8 @@ strcmp:
         /* Restore temporaries early, before computing the return value.  */
         ldrd    r6, r7, [sp]
         ldrd    r4, r5, [sp, #8]
-        adds    sp, sp, #16
+	SFI_SP \
+        add     sp, sp, #16
 
         /* There is a zero or a different byte between r1 and r2.  */
         /* r0 contains a mask of all-zero bytes in r1.  */
@@ -414,7 +435,7 @@ strcmp:
         (C==0 and Z==1) cannot happen because the carry bit is "not borrow".  */
         it      ls
         sbcls   r0, r0, r0
-        bx      lr
+        RETURN
 
 
 #else   /* !(defined (_ISA_THUMB_2) || defined (_ISA_ARM_6)
@@ -440,8 +461,10 @@ strcmp:
         ands    r2, r0, #3
         bic     r0, r0, #3
         bic     r1, r1, #3
+	SFI_BREG(r0) \
         ldr     ip, [r0], #4
         it      eq
+	SFI_BREG(r1) \
         ldreq   r3, [r1], #4
         beq     1f
         /* Although s1 and s2 have identical initial alignment, they are
@@ -453,6 +476,7 @@ strcmp:
         lsl     r2, r2, #3
         mvn     r3, MSB
         S2LOMEM        r2, r3, r2
+	SFI_BREG(r1) \
         ldr     r3, [r1], #4
         orr     ip, ip, r2
         orr     r3, r3, r2
@@ -474,7 +498,9 @@ strcmp:
         /* check for any zero bytes in first word */
         biceq   r2, r2, ip
         tsteq   r2, magic2(r4)
+	SFI_BREG(r0) \
         ldreq   ip, [r0], #4
+	SFI_BREG(r1) \
         ldreq   r3, [r1], #4
         beq     4b
 2:
@@ -621,7 +647,9 @@ strcmp:
 1:
         tst     wp1, #3
         beq     2f
+	SFI_BREG(wp1) \
         ldrb    r2, [wp1], #1
+	SFI_BREG(wp2) \
         ldrb    r3, [wp2], #1
         cmp     r2, #1
         it      cs
@@ -640,7 +668,9 @@ strcmp:
 
         and     t1, wp2, #3
         bic     wp2, wp2, #3
+	SFI_BREG(wp1) \
         ldr     w1, [wp1], #4
+	SFI_BREG(wp2) \
         ldr     w2, [wp2], #4
         cmp     t1, #2
         beq     2f
@@ -656,11 +686,13 @@ strcmp:
         bne     4f
         ands    r3, r3, b1, lsl #7
         it      eq
+	SFI_BREG(wp2) \
         ldreq   w2, [wp2], #4
         bne     5f
         eor     t1, t1, w1
         cmp     t1, w2, S2HIMEM #24
         bne     6f
+	SFI_BREG(wp1) \
         ldr     w1, [wp1], #4
         b       1b
 4:
@@ -680,6 +712,7 @@ strcmp:
         bics    r3, r3, #0xff000000
         bne     7f
 #endif
+	SFI_BREG(wp2) \
         ldrb    w2, [wp2]
         S2LOMEM  t1, w1, #24
 #ifdef __ARMEB__
@@ -708,6 +741,7 @@ strcmp:
         eor     t1, t1, w1
         cmp     t1, w2, S2HIMEM #16
         bne     6f
+	SFI_BREG(wp1) \
         ldr     w1, [wp1], #4
         b       2b
 
@@ -747,11 +781,13 @@ strcmp:
         bne     4f
         ands    r3, r3, b1, lsl #7
         it      eq
+	SFI_BREG(wp2) \
         ldreq   w2, [wp2], #4
         bne     5f
         eor     t1, t1, w1
         cmp     t1, w2, S2HIMEM #8
         bne     6f
+	SFI_BREG(wp1) \
         ldr     w1, [wp1], #4
         b       3b
 4:
@@ -762,6 +798,7 @@ strcmp:
         with the bytes 0x01 0x00 */
         tst     w1, LSB
         beq     7f
+	SFI_BREG(wp2) \
         ldr     w2, [wp2], #4
 6:
         S2LOMEM  t1, w1, #8
