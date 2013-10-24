@@ -204,7 +204,7 @@ int	_EXFUN(unsetenv,(const char *__string));
 int	_EXFUN(_unsetenv_r,(struct _reent *, const char *__string));
 #endif
 
-#ifdef __rtems__
+#if defined(__rtems__) || defined(__native_client__)
 int _EXFUN(posix_memalign,(void **, size_t, size_t));
 #endif
 
