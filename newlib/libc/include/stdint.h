@@ -434,23 +434,40 @@ typedef unsigned long uintptr_t;
 #endif
 #define PTRDIFF_MIN (-PTRDIFF_MAX - 1)
 
-#ifdef __WCHAR_MAX__
-#define WCHAR_MAX __WCHAR_MAX__
-#endif
+#ifndef WCHAR_MIN
 #ifdef __WCHAR_MIN__
 #define WCHAR_MIN __WCHAR_MIN__
+#elif defined(__WCHAR_UNSIGNED__)
+#define WCHAR_MIN 0
+#else
+#define WCHAR_MIN (-0x7fffffff - 1)
+#endif
+#endif
+
+#ifndef WCHAR_MAX
+#ifdef __WCHAR_MAX__
+#define WCHAR_MAX __WCHAR_MAX__
+#elif defined(__WCHAR_UNSIGNED__)
+#define WCHAR_MAX 0xffffffffu
+#else
+#define WCHAR_MAX 0x7fffffffu
+#endif
 #endif
 
 /* wint_t is unsigned int on almost all GCC targets.  */
 #ifdef __WINT_MAX__
 #define WINT_MAX __WINT_MAX__
-#else
+#elif defined(__WINT_UNSIGNED__)
 #define WINT_MAX (__STDINT_EXP(INT_MAX) * 2U + 1U)
+#else
+#define WINT_MAX __STDINT_EXP(INT_MAX)
 #endif
 #ifdef __WINT_MIN__
 #define WINT_MIN __WINT_MIN__
-#else
+#elif defined(__WINT_UNSIGNED__)
 #define WINT_MIN 0U
+#else
+#define WINT_MIN (-WINT_MAX - 1)
 #endif
 
 /** Macros for minimum-width integer constant expressions */
