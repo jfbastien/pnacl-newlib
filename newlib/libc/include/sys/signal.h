@@ -161,7 +161,7 @@ int _EXFUN(sigpending, (sigset_t *));
 int _EXFUN(sigsuspend, (const sigset_t *));
 int _EXFUN(sigpause, (int));
 
-#if defined(_POSIX_THREADS)
+#if defined(_POSIX_THREADS) && !defined(__native_client__)
 #ifdef __CYGWIN__
 #  ifndef _CYGWIN_TYPES_H
 #    error You need the winsup sources or a cygwin installation to compile the cygwin version of newlib.

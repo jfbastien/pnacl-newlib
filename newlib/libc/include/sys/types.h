@@ -306,7 +306,8 @@ typedef long suseconds_t;
  * This means that we don't use the types defined here, but rather in
  * <cygwin/types.h>
  */
-#if defined(_POSIX_THREADS) && !defined(__CYGWIN__)
+#if defined(_POSIX_THREADS) && !defined(__CYGWIN__) \
+    && !defined(__native_client__)
 
 #include <sys/sched.h>
 

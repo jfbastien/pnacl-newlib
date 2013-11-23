@@ -207,6 +207,7 @@ extern "C" {
 #ifdef __native_client__
 # define _NACL_POSIX_CLOCK      1
 # define _POSIX_MONOTONIC_CLOCK 1
+# define _POSIX_THREADS         1
 #endif /* __native_client__ */
 
 /* Per the permission given in POSIX.1-2008 section 2.2.1, define
