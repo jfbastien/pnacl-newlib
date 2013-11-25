@@ -17,7 +17,7 @@ extern "C" {
 typedef unsigned long sigset_t;
 #endif
 
-#if defined(__rtems__)
+#if defined(__rtems__) || defined (__native_client__)
 
 #if defined(_POSIX_REALTIME_SIGNALS)
 
@@ -117,7 +117,7 @@ struct sigaction
 	sigset_t sa_mask;
 	int sa_flags;
 };
-#endif /* defined(__rtems__) */
+#endif /* defined(__rtems__) || defined(__native_client__) */
 
 #define SIG_SETMASK 0	/* set mask with sigprocmask() */
 #define SIG_BLOCK 1	/* set of signals to block */
